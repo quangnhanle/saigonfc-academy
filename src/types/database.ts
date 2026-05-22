@@ -20,7 +20,6 @@ export type SkillTest = {
   test_name: string;
   description?: string | null;
   record_type: RecordType;
-  standard_unit: string;
   higher_is_better: boolean;
 };
 

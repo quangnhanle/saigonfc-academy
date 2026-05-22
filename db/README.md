@@ -31,17 +31,17 @@ club_standards (1) ─┐
 students       (1) ─┘                                            ┘
 ```
 
-- **`club_standards`**: nhóm kỹ năng lớn — Dẫn bóng, Chuyền bóng, Sút bóng, Thể lực, Tư duy chơi bóng
-- **`skill_tests`**: bài test cụ thể, giữ `record_type` + `standard_unit` + `higher_is_better` (dùng chung cho mọi sub bên dưới)
+- **`club_standards`**: nhóm kỹ năng lớn — Dẫn bóng, Chuyền bóng, Sút bóng, Thể lực
+- **`skill_tests`**: bài test cụ thể, giữ `record_type` (`time_seconds` hoặc `success_attempt`) + `higher_is_better` (dùng chung cho mọi sub bên dưới). Đơn vị hiển thị suy ra từ `record_type`: `time_seconds` → "giây", `success_attempt` → "%".
 - **`sub_skill_tests`**: biến thể (chân trái / chân phải / hai chân, 30m / 60m ...) với `standard_score` riêng
-- **`student_test_results`**: kết quả thô; chia thành `value_numeric` hoặc `success_count + attempt_count` tùy `record_type`, kèm cache `score_percent`
+- **`student_test_results`**: kết quả thô; chia thành `value_numeric` (cho `time_seconds`) hoặc `success_count + attempt_count` (cho `success_attempt`), kèm cache `score_percent`
 
 ## Logic tự động (trigger)
 
 | Trigger | Khi nào | Tác dụng |
 | --- | --- | --- |
 | `set_updated_at` | trước `UPDATE` | gán `updated_at = now()` |
-| `validate_result_shape` | trước `INSERT/UPDATE student_test_results` | bắt buộc raw value khớp `record_type` (success_attempt → `success_count + attempt_count`, còn lại → `value_numeric`) |
+| `validate_result_shape` | trước `INSERT/UPDATE student_test_results` | bắt buộc raw value khớp `record_type` (success_attempt → `success_count + attempt_count`, time_seconds → `value_numeric`) |
 | `fill_score_percent` | trước `INSERT/UPDATE student_test_results` | tính `score_percent` từ raw + standard |
 | `recompute_on_standard_change` | sau `UPDATE sub_skill_tests.standard_score` | tính lại `score_percent` của mọi kết quả thuộc sub đó |
 | `recompute_on_test_change` | sau `UPDATE skill_tests.{higher_is_better, record_type}` | tính lại `score_percent` của mọi kết quả thuộc test đó |
@@ -52,7 +52,7 @@ Hàm `calc_score_percent(record_type, higher_is_better, standard, value, success
 
 1. Quy raw về 1 con số:
    - `success_attempt` → `actual = success / attempt * 100`
-   - còn lại → `actual = value_numeric`
+   - `time_seconds` → `actual = value_numeric`
 2. Tính:
    - `higher_is_better = true` → `actual / standard * 100`
    - `higher_is_better = false` → `standard / actual * 100`
@@ -91,7 +91,7 @@ UPDATE student_test_results_old r
        attempt_count = (raw_value->>'attempt')::int
  WHERE raw_value ? 'success';
 
--- time_seconds / percentage / score
+-- time_seconds
 UPDATE student_test_results_old r
    SET value_numeric = (raw_value->>'value')::numeric
  WHERE raw_value ? 'value';

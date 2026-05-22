@@ -23,6 +23,7 @@ import {
   calculateDifference,
   formatResultRaw
 } from "../utils/score";
+import { unitOf } from "../types/football";
 
 export function StudentProfilePage() {
   const { studentId } = useParams<{ studentId: string }>();
@@ -80,10 +81,10 @@ export function StudentProfilePage() {
             key: r.id,
             testName: test.test_name,
             subSkillTestName: sub.sub_skill_test_name,
-            unit: test.standard_unit,
+            unit: unitOf(test.record_type),
             standardScore: sub.standard_score,
             recordType: test.record_type,
-            rawLabel: formatResultRaw(r, test.record_type, test.standard_unit),
+            rawLabel: formatResultRaw(r, test.record_type),
             scorePercent: r.score_percent,
             difference: calculateDifference(
               r,

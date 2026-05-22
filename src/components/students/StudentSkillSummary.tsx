@@ -7,11 +7,7 @@ export type SkillSummaryRow = {
   subSkillTestName: string;
   unit: string;
   standardScore: number;
-  recordType:
-    | "time_seconds"
-    | "success_attempt"
-    | "percentage"
-    | "score";
+  recordType: "time_seconds" | "success_attempt";
   rawLabel: string;
   scorePercent: number;
   difference: number;

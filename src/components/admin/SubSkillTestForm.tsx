@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import type { SkillTest, SubSkillTest } from "../../types/database";
+import { unitOf } from "../../types/football";
 import { Button } from "../common/Button";
 import { FieldLabel, TextInput } from "../common/FormField";
 
@@ -60,7 +61,9 @@ export function SubSkillTestForm({
       </FieldLabel>
       <div className="grid sm:grid-cols-2 gap-4">
         <FieldLabel
-          label={`Điểm chuẩn (${selectedTest?.standard_unit ?? ""})`}
+          label={`Điểm chuẩn (${
+            selectedTest ? unitOf(selectedTest.record_type) : ""
+          })`}
           required
           hint={
             selectedTest

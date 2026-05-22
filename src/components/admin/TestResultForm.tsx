@@ -16,6 +16,7 @@ import {
   calculateScorePercent,
   formatDifference
 } from "../../utils/score";
+import { unitOf } from "../../types/football";
 import { getRating } from "../../utils/rating";
 import { RatingBadge } from "../common/Badge";
 
@@ -189,7 +190,9 @@ export function TestResultForm({
         </div>
       ) : (
         <FieldLabel
-          label={`Kết quả (${selectedTest?.standard_unit ?? ""})`}
+          label={`Kết quả (${
+            selectedTest ? unitOf(selectedTest.record_type) : ""
+          })`}
           required
         >
           <TextInput
@@ -242,7 +245,7 @@ export function TestResultForm({
                     : "text-orange-300"
                 }`}
               >
-                {formatDifference(preview.difference, selectedTest.standard_unit)}
+                {formatDifference(preview.difference, selectedTest.record_type)}
               </p>
             </div>
             <div>

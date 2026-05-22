@@ -1,4 +1,5 @@
 import type { RecordType } from "../types/football";
+import { unitOf } from "../types/football";
 import type { TestResult } from "../types/database";
 
 type ScoreInput = {
@@ -54,8 +55,7 @@ export function formatResultRaw(
     TestResult,
     "value_numeric" | "success_count" | "attempt_count"
   >,
-  recordType: RecordType,
-  unit: string
+  recordType: RecordType
 ): string {
   if (recordType === "success_attempt") {
     const s = result.success_count ?? 0;
@@ -65,7 +65,7 @@ export function formatResultRaw(
   }
   const v = result.value_numeric ?? 0;
   const formatted = Number.isInteger(v) ? v.toString() : v.toFixed(2);
-  return `${formatted} ${unit}`;
+  return `${formatted} ${unitOf(recordType)}`;
 }
 
 /**
@@ -92,8 +92,8 @@ export function calculateDifference(
   return Math.round((higherIsBetter ? diff : -diff) * 100) / 100;
 }
 
-export function formatDifference(diff: number, unit: string): string {
+export function formatDifference(diff: number, recordType: RecordType): string {
   const sign = diff > 0 ? "+" : "";
   const formatted = Number.isInteger(diff) ? diff.toString() : diff.toFixed(2);
-  return `${sign}${formatted} ${unit}`;
+  return `${sign}${formatted} ${unitOf(recordType)}`;
 }

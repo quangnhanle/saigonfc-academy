@@ -11,8 +11,7 @@ export const clubStandards: ClubStandard[] = [
   { id: "cs-1", standard_name: "Dẫn bóng" },
   { id: "cs-2", standard_name: "Chuyền bóng" },
   { id: "cs-3", standard_name: "Sút bóng" },
-  { id: "cs-4", standard_name: "Thể lực" },
-  { id: "cs-5", standard_name: "Tư duy chơi bóng" }
+  { id: "cs-4", standard_name: "Thể lực" }
 ];
 
 export const skillTests: SkillTest[] = [
@@ -22,7 +21,6 @@ export const skillTests: SkillTest[] = [
     test_name: "Dẫn bóng qua chướng ngại vật",
     description: "Vượt 6 cọc cách nhau 5m, đếm số lần thành công trên 10 lượt.",
     record_type: "success_attempt",
-    standard_unit: "%",
     higher_is_better: true,
   },
   {
@@ -31,7 +29,6 @@ export const skillTests: SkillTest[] = [
     test_name: "Chuyền 15m",
     description: "Chuyền chính xác bóng ở cự ly 15m, đo thời gian thực hiện.",
     record_type: "time_seconds",
-    standard_unit: "giây",
     higher_is_better: false,
   },
   {
@@ -40,7 +37,6 @@ export const skillTests: SkillTest[] = [
     test_name: "Chuyền 25m",
     description: "Chuyền dài 25m, đo thời gian thực hiện.",
     record_type: "time_seconds",
-    standard_unit: "giây",
     higher_is_better: false,
   },
   {
@@ -49,7 +45,6 @@ export const skillTests: SkillTest[] = [
     test_name: "Sút trúng mục tiêu",
     description: "Sút 10 lần vào khung mục tiêu từ 16m.",
     record_type: "success_attempt",
-    standard_unit: "%",
     higher_is_better: true,
   },
   {
@@ -58,26 +53,7 @@ export const skillTests: SkillTest[] = [
     test_name: "Chạy nước rút 30m",
     description: "Chạy nước rút 30m, đo thời gian.",
     record_type: "time_seconds",
-    standard_unit: "giây",
     higher_is_better: false,
-  },
-  {
-    id: "st-yoyo",
-    club_standard_id: "cs-4",
-    test_name: "Yo-Yo endurance test",
-    description: "Bài test sức bền liên tục đến khi không theo nhịp.",
-    record_type: "score",
-    standard_unit: "mét",
-    higher_is_better: true,
-  },
-  {
-    id: "st-tactical",
-    club_standard_id: "cs-5",
-    test_name: "Đánh giá quyết định chiến thuật",
-    description: "Đánh giá khả năng đọc tình huống và ra quyết định.",
-    record_type: "score",
-    standard_unit: "điểm",
-    higher_is_better: true,
   }
 ];
 
@@ -100,13 +76,7 @@ export const subSkillTests: SubSkillTest[] = [
   { id: "sst-shoot-lob",  skill_test_id: "st-shooting-target", sub_skill_test_name: "Sút bổng", standard_score: 60 },
 
   // Chạy nước rút
-  { id: "sst-sprint-30", skill_test_id: "st-sprint-30m", sub_skill_test_name: "30m", standard_score: 4.3 },
-
-  // Yo-Yo
-  { id: "sst-yoyo-total", skill_test_id: "st-yoyo", sub_skill_test_name: "Tổng quãng đường", standard_score: 2200 },
-
-  // Tư duy
-  { id: "sst-tactical-total", skill_test_id: "st-tactical", sub_skill_test_name: "Tổng điểm", standard_score: 85 }
+  { id: "sst-sprint-30", skill_test_id: "st-sprint-30m", sub_skill_test_name: "30m", standard_score: 4.3 }
 ];
 
 export const students: Student[] = [
@@ -136,8 +106,6 @@ const rawResults: RawInput[] = [
   { student_id: "s-001", sub_skill_test_id: "sst-pass15-right", value_numeric: 3.1 },
   { student_id: "s-001", sub_skill_test_id: "sst-shoot-flat",   success_count: 8,  attempt_count: 10 },
   { student_id: "s-001", sub_skill_test_id: "sst-sprint-30",    value_numeric: 4.2 },
-  { student_id: "s-001", sub_skill_test_id: "sst-yoyo-total",   value_numeric: 2350 },
-  { student_id: "s-001", sub_skill_test_id: "sst-tactical-total", value_numeric: 88 },
 
   // Minh Khôi
   { student_id: "s-002", sub_skill_test_id: "sst-drib-right", success_count: 8, attempt_count: 10 },
@@ -146,15 +114,11 @@ const rawResults: RawInput[] = [
   { student_id: "s-002", sub_skill_test_id: "sst-pass25-right", value_numeric: 5.1 },
   { student_id: "s-002", sub_skill_test_id: "sst-shoot-flat",   success_count: 6, attempt_count: 10 },
   { student_id: "s-002", sub_skill_test_id: "sst-sprint-30",    value_numeric: 4.45 },
-  { student_id: "s-002", sub_skill_test_id: "sst-yoyo-total",   value_numeric: 2400 },
-  { student_id: "s-002", sub_skill_test_id: "sst-tactical-total", value_numeric: 92 },
 
   // Quang Hưng
   { student_id: "s-003", sub_skill_test_id: "sst-drib-left", success_count: 8, attempt_count: 10 },
   { student_id: "s-003", sub_skill_test_id: "sst-pass15-left", value_numeric: 3.6 },
   { student_id: "s-003", sub_skill_test_id: "sst-sprint-30",   value_numeric: 4.15 },
-  { student_id: "s-003", sub_skill_test_id: "sst-yoyo-total",  value_numeric: 2280 },
-  { student_id: "s-003", sub_skill_test_id: "sst-tactical-total", value_numeric: 78 },
 
   // Đức Huy
   { student_id: "s-004", sub_skill_test_id: "sst-drib-right", success_count: 7, attempt_count: 10 },
@@ -162,28 +126,21 @@ const rawResults: RawInput[] = [
   { student_id: "s-004", sub_skill_test_id: "sst-pass25-right", value_numeric: 5.4 },
   { student_id: "s-004", sub_skill_test_id: "sst-shoot-flat",   success_count: 5, attempt_count: 10 },
   { student_id: "s-004", sub_skill_test_id: "sst-sprint-30",    value_numeric: 4.5 },
-  { student_id: "s-004", sub_skill_test_id: "sst-tactical-total", value_numeric: 80 },
 
   // Tấn Lộc
   { student_id: "s-005", sub_skill_test_id: "sst-drib-left",  success_count: 5, attempt_count: 10 },
   { student_id: "s-005", sub_skill_test_id: "sst-pass15-left", value_numeric: 3.7 },
   { student_id: "s-005", sub_skill_test_id: "sst-shoot-flat",  success_count: 7, attempt_count: 10 },
   { student_id: "s-005", sub_skill_test_id: "sst-sprint-30",   value_numeric: 4.3 },
-  { student_id: "s-005", sub_skill_test_id: "sst-yoyo-total",  value_numeric: 1950 },
-  { student_id: "s-005", sub_skill_test_id: "sst-tactical-total", value_numeric: 70 },
 
   // Bảo Sơn
   { student_id: "s-006", sub_skill_test_id: "sst-drib-right", success_count: 6, attempt_count: 10 },
   { student_id: "s-006", sub_skill_test_id: "sst-pass15-right", value_numeric: 3.3 },
   { student_id: "s-006", sub_skill_test_id: "sst-sprint-30",    value_numeric: 4.6 },
-  { student_id: "s-006", sub_skill_test_id: "sst-yoyo-total",   value_numeric: 2200 },
-  { student_id: "s-006", sub_skill_test_id: "sst-tactical-total", value_numeric: 86 },
 
   // Anh Tuấn
   { student_id: "s-007", sub_skill_test_id: "sst-pass15-right", value_numeric: 3.4 },
   { student_id: "s-007", sub_skill_test_id: "sst-sprint-30",    value_numeric: 4.7 },
-  { student_id: "s-007", sub_skill_test_id: "sst-yoyo-total",   value_numeric: 1980 },
-  { student_id: "s-007", sub_skill_test_id: "sst-tactical-total", value_numeric: 82 },
 
   // Gia Bảo
   { student_id: "s-008", sub_skill_test_id: "sst-drib-left",  success_count: 7, attempt_count: 10 },
@@ -191,8 +148,7 @@ const rawResults: RawInput[] = [
   { student_id: "s-008", sub_skill_test_id: "sst-pass15-left",  value_numeric: 3.2 },
   { student_id: "s-008", sub_skill_test_id: "sst-pass15-right", value_numeric: 2.9 },
   { student_id: "s-008", sub_skill_test_id: "sst-shoot-flat",   success_count: 7, attempt_count: 10 },
-  { student_id: "s-008", sub_skill_test_id: "sst-sprint-30",    value_numeric: 4.35 },
-  { student_id: "s-008", sub_skill_test_id: "sst-tactical-total", value_numeric: 90 }
+  { student_id: "s-008", sub_skill_test_id: "sst-sprint-30",    value_numeric: 4.35 }
 ];
 
 export const testResults: TestResult[] = rawResults.map((row, idx) => {

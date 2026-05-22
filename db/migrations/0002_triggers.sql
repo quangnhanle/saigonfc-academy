@@ -67,11 +67,12 @@ BEGIN
       RAISE EXCEPTION 'record_type=success_attempt không dùng value_numeric';
     END IF;
   ELSE
+    -- record_type = time_seconds
     IF NEW.value_numeric IS NULL THEN
-      RAISE EXCEPTION 'record_type=% cần value_numeric', v_record_type;
+      RAISE EXCEPTION 'record_type=time_seconds cần value_numeric';
     END IF;
     IF NEW.success_count IS NOT NULL OR NEW.attempt_count IS NOT NULL THEN
-      RAISE EXCEPTION 'record_type=% không dùng success/attempt', v_record_type;
+      RAISE EXCEPTION 'record_type=time_seconds không dùng success/attempt';
     END IF;
   END IF;
 

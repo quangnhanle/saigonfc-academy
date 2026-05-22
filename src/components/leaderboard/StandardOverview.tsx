@@ -40,11 +40,6 @@ export function StandardOverview() {
                     <p className="text-xs font-semibold text-brand-300 uppercase tracking-wider">
                       {cs.standard_name}
                     </p>
-                    {cs.description ? (
-                      <p className="text-sm text-ink/80 mt-1">
-                        {cs.description}
-                      </p>
-                    ) : null}
                   </div>
                   <div className="text-right shrink-0">
                     <p className="display-font text-2xl text-ink leading-none">

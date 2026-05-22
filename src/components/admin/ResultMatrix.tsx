@@ -12,6 +12,7 @@ import { EmptyState } from "../common/EmptyState";
 import { Modal } from "../common/Modal";
 import { SubSkillTestForm } from "./SubSkillTestForm";
 import { calculateScorePercent } from "../../utils/score";
+import { unitOf } from "../../types/football";
 import { RATING_TONE } from "../../utils/rating";
 import { getRating } from "../../utils/rating";
 
@@ -154,7 +155,7 @@ function MatrixCell({
             className="w-full max-w-[110px] rounded-lg bg-background/60 border border-border px-2 py-1.5 text-sm text-ink outline-none focus:border-brand/60 focus:ring-2 focus:ring-brand/20"
           />
           <span className="text-[10px] text-muted shrink-0">
-            {test.standard_unit}
+            {unitOf(test.record_type)}
           </span>
         </div>
       )}
@@ -189,7 +190,7 @@ function SubHeaderChip({
         {sub.sub_skill_test_name}
       </span>
       <span className="text-[11px] text-muted">
-        Chuẩn {sub.standard_score} {test.standard_unit} ·{" "}
+        Chuẩn {sub.standard_score} {unitOf(test.record_type)} ·{" "}
         {test.higher_is_better ? "↑" : "↓"}
       </span>
       <div className="flex items-center gap-1 mt-0.5">

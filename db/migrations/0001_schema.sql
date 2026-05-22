@@ -15,9 +15,7 @@ BEGIN
   IF NOT EXISTS (SELECT 1 FROM pg_type WHERE typname = 'record_type_enum') THEN
     CREATE TYPE record_type_enum AS ENUM (
       'time_seconds',
-      'success_attempt',
-      'percentage',
-      'score'
+      'success_attempt'
     );
   END IF;
 END $$;
@@ -55,7 +53,6 @@ CREATE TABLE IF NOT EXISTS skill_tests (
   test_name         varchar(255)     NOT NULL,
   description       text,
   record_type       record_type_enum NOT NULL,
-  standard_unit     varchar(32)      NOT NULL,
   higher_is_better  boolean          NOT NULL,
   display_order     smallint         NOT NULL DEFAULT 0,
   created_at        timestamptz      NOT NULL DEFAULT now(),
@@ -87,7 +84,7 @@ CREATE TABLE IF NOT EXISTS student_test_results (
   student_id          bigint        NOT NULL REFERENCES students(id) ON DELETE CASCADE,
   sub_skill_test_id   bigint        NOT NULL REFERENCES sub_skill_tests(id) ON DELETE CASCADE,
 
-  -- Cho record_type IN (time_seconds, percentage, score)
+  -- Cho record_type = time_seconds
   value_numeric       numeric(10,3),
 
   -- Cho record_type = success_attempt

@@ -10,8 +10,7 @@ INSERT INTO club_standards (standard_name, display_order, description) VALUES
   ('Dẫn bóng',         1, 'Kiểm soát và điều khiển bóng'),
   ('Chuyền bóng',      2, 'Phối hợp và phát triển bóng'),
   ('Sút bóng',         3, 'Khả năng dứt điểm'),
-  ('Thể lực',          4, 'Tốc độ, sức bền, di chuyển'),
-  ('Tư duy chơi bóng', 5, 'Đọc trận đấu, ra quyết định')
+  ('Thể lực',          4, 'Tốc độ, sức bền, di chuyển')
 ON CONFLICT (standard_name) DO NOTHING;
 
 -- ---------- skill_tests ----------
@@ -19,18 +18,16 @@ WITH cs AS (
   SELECT id, standard_name FROM club_standards
 )
 INSERT INTO skill_tests
-  (club_standard_id, test_name, record_type, standard_unit, higher_is_better, display_order)
-SELECT cs.id, t.test_name, t.record_type, t.standard_unit, t.higher_is_better, t.display_order
+  (club_standard_id, test_name, record_type, higher_is_better, display_order)
+SELECT cs.id, t.test_name, t.record_type, t.higher_is_better, t.display_order
   FROM cs
   JOIN (VALUES
-    ('Dẫn bóng',         'Dẫn bóng qua chướng ngại vật', 'success_attempt'::record_type_enum, '%',    true,  1),
-    ('Chuyền bóng',      'Chuyền 15m',                   'time_seconds'::record_type_enum,    'giây', false, 1),
-    ('Chuyền bóng',      'Chuyền 25m',                   'time_seconds'::record_type_enum,    'giây', false, 2),
-    ('Sút bóng',         'Sút trúng mục tiêu',           'success_attempt'::record_type_enum, '%',    true,  1),
-    ('Thể lực',          'Chạy nước rút 30m',            'time_seconds'::record_type_enum,    'giây', false, 1),
-    ('Thể lực',          'Yo-Yo endurance test',         'score'::record_type_enum,           'mét',  true,  2),
-    ('Tư duy chơi bóng', 'Đánh giá quyết định chiến thuật', 'score'::record_type_enum,        'điểm', true,  1)
-  ) AS t(standard_name, test_name, record_type, standard_unit, higher_is_better, display_order)
+    ('Dẫn bóng',         'Dẫn bóng qua chướng ngại vật', 'success_attempt'::record_type_enum, true,  1),
+    ('Chuyền bóng',      'Chuyền 15m',                   'time_seconds'::record_type_enum,    false, 1),
+    ('Chuyền bóng',      'Chuyền 25m',                   'time_seconds'::record_type_enum,    false, 2),
+    ('Sút bóng',         'Sút trúng mục tiêu',           'success_attempt'::record_type_enum, true,  1),
+    ('Thể lực',          'Chạy nước rút 30m',            'time_seconds'::record_type_enum,    false, 1)
+  ) AS t(standard_name, test_name, record_type, higher_is_better, display_order)
     ON t.standard_name = cs.standard_name
 ON CONFLICT (club_standard_id, test_name) DO NOTHING;
 
@@ -52,9 +49,7 @@ SELECT st.id, s.sub_name, s.standard_score, s.display_order
     ('Chuyền 25m',                   'Chân phải',  5.0, 2),
     ('Sút trúng mục tiêu',           'Sút sệt',    70,  1),
     ('Sút trúng mục tiêu',           'Sút bổng',   60,  2),
-    ('Chạy nước rút 30m',            '30m',        4.3, 1),
-    ('Yo-Yo endurance test',         'Tổng quãng đường', 2200, 1),
-    ('Đánh giá quyết định chiến thuật', 'Tổng điểm', 85,  1)
+    ('Chạy nước rút 30m',            '30m',        4.3, 1)
   ) AS s(test_name, sub_name, standard_score, display_order)
     ON s.test_name = st.test_name
 ON CONFLICT (skill_test_id, sub_skill_test_name) DO NOTHING;

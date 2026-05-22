@@ -21,7 +21,7 @@ import { Pill } from "../common/Badge";
 import { Modal } from "../common/Modal";
 import { SkillTestForm } from "./SkillTestForm";
 import { ResultMatrix } from "./ResultMatrix";
-import { RECORD_TYPE_LABEL } from "../../types/football";
+import { RECORD_TYPE_LABEL, unitOf } from "../../types/football";
 
 type Props = {
   standards: ClubStandard[];
@@ -173,11 +173,6 @@ export function TestExplorer({
                       <p className="text-xs font-semibold text-brand-300 uppercase tracking-wider">
                         {cs.standard_name}
                       </p>
-                      {cs.description ? (
-                        <p className="text-sm text-ink/80 mt-1 line-clamp-2">
-                          {cs.description}
-                        </p>
-                      ) : null}
                     </div>
                     <ChevronRight className="h-5 w-5 text-muted group-hover:text-brand transition shrink-0" />
                   </div>
@@ -238,7 +233,7 @@ export function TestExplorer({
                         </p>
                         <p className="text-xs text-muted mt-0.5">
                           {RECORD_TYPE_LABEL[t.record_type]} · đơn vị{" "}
-                          {t.standard_unit} ·{" "}
+                          {unitOf(t.record_type)} ·{" "}
                           {t.higher_is_better
                             ? "Càng cao càng tốt"
                             : "Càng thấp càng tốt"}{" "}
@@ -304,7 +299,6 @@ export function TestExplorer({
                 test_name: "",
                 description: null,
                 record_type: "time_seconds",
-                standard_unit: "giây",
                 higher_is_better: false
               } as SkillTest)
             }

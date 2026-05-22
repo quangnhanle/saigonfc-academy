@@ -1,7 +1,12 @@
 import { useEffect, useState } from "react";
 import type { ClubStandard, SkillTest } from "../../types/database";
 import type { RecordType } from "../../types/football";
-import { RECORD_TYPE_HINT, RECORD_TYPE_LABEL } from "../../types/football";
+import {
+  RECORD_TYPES,
+  RECORD_TYPE_HINT,
+  RECORD_TYPE_LABEL,
+  RECORD_TYPE_UNIT
+} from "../../types/football";
 import { Button } from "../common/Button";
 import { FieldLabel, Select, TextArea, TextInput } from "../common/FormField";
 
@@ -24,7 +29,6 @@ export function SkillTestForm({
   const [testName, setTestName] = useState("");
   const [description, setDescription] = useState("");
   const [recordType, setRecordType] = useState<RecordType>("time_seconds");
-  const [standardUnit, setStandardUnit] = useState("giây");
   const [higherIsBetter, setHigherIsBetter] = useState(false);
 
   useEffect(() => {
@@ -33,14 +37,12 @@ export function SkillTestForm({
       setTestName(initial.test_name);
       setDescription(initial.description ?? "");
       setRecordType(initial.record_type);
-      setStandardUnit(initial.standard_unit);
       setHigherIsBetter(initial.higher_is_better);
     } else {
       setClubStandardId(standards[0]?.id ?? "");
       setTestName("");
       setDescription("");
       setRecordType("time_seconds");
-      setStandardUnit("giây");
       setHigherIsBetter(false);
     }
   }, [initial, standards]);
@@ -56,7 +58,6 @@ export function SkillTestForm({
           test_name: testName.trim(),
           description: description.trim() || null,
           record_type: recordType,
-          standard_unit: standardUnit.trim() || "điểm",
           higher_is_better: higherIsBetter
         });
       }}
@@ -81,38 +82,22 @@ export function SkillTestForm({
           required
         />
       </FieldLabel>
-      <div className="grid sm:grid-cols-2 gap-4">
-        <FieldLabel
-          label="Cách đo kết quả"
-          required
-          hint={RECORD_TYPE_HINT[recordType]}
+      <FieldLabel
+        label="Cách đo kết quả"
+        required
+        hint={`${RECORD_TYPE_HINT[recordType]} · đơn vị "${RECORD_TYPE_UNIT[recordType]}"`}
+      >
+        <Select
+          value={recordType}
+          onChange={(e) => setRecordType(e.target.value as RecordType)}
         >
-          <Select
-            value={recordType}
-            onChange={(e) => setRecordType(e.target.value as RecordType)}
-          >
-            {(
-              [
-                "time_seconds",
-                "success_attempt",
-                "percentage",
-                "score"
-              ] as RecordType[]
-            ).map((rt) => (
-              <option key={rt} value={rt}>
-                {RECORD_TYPE_LABEL[rt]}
-              </option>
-            ))}
-          </Select>
-        </FieldLabel>
-        <FieldLabel label="Đơn vị hiển thị" required>
-          <TextInput
-            value={standardUnit}
-            onChange={(e) => setStandardUnit(e.target.value)}
-            placeholder="giây / % / lần / điểm / mét"
-          />
-        </FieldLabel>
-      </div>
+          {RECORD_TYPES.map((rt) => (
+            <option key={rt} value={rt}>
+              {RECORD_TYPE_LABEL[rt]} ({RECORD_TYPE_UNIT[rt]})
+            </option>
+          ))}
+        </Select>
+      </FieldLabel>
       <FieldLabel label="Cách tính điểm" required>
         <Select
           value={higherIsBetter ? "yes" : "no"}
