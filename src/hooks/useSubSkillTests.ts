@@ -4,9 +4,9 @@ export function useSubSkillTests() {
   const store = useDataStore();
   return {
     data: store.subSkillTests,
-    loading: false,
-    error: null as string | null,
-    refetch: async () => undefined,
+    loading: store.loading,
+    error: store.error,
+    refetch: store.refetch,
     create: store.createSubSkillTest,
     update: store.updateSubSkillTest,
     remove: store.deleteSubSkillTest

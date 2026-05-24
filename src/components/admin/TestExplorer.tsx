@@ -21,6 +21,7 @@ import { Pill } from "../common/Badge";
 import { Modal } from "../common/Modal";
 import { SkillTestForm } from "./SkillTestForm";
 import { ResultMatrix } from "./ResultMatrix";
+import { StandardMatrix } from "./StandardMatrix";
 import { RECORD_TYPE_LABEL, unitOf } from "../../types/football";
 
 type Props = {
@@ -97,6 +98,16 @@ export function TestExplorer({
         ? subTests.filter((s) => s.skill_test_id === selectedTestId)
         : [],
     [subTests, selectedTestId]
+  );
+
+  const subsInStandard = useMemo(
+    () =>
+      selectedStandardId
+        ? subTests.filter((s) =>
+            testsInStandard.some((t) => t.id === s.skill_test_id)
+          )
+        : [],
+    [subTests, selectedStandardId, testsInStandard]
   );
 
   const goToStandards = () => {
@@ -179,6 +190,9 @@ export function TestExplorer({
                   <div className="mt-3 flex flex-wrap gap-1.5">
                     <Pill>{csTests.length} bài test</Pill>
                     <Pill>{csSubCount} bài test con</Pill>
+                    <Pill tone="brand">
+                      Chuẩn {cs.standard_score ?? 100}%
+                    </Pill>
                   </div>
                 </button>
               );
@@ -211,6 +225,28 @@ export function TestExplorer({
             description="Thêm bài test đầu tiên cho nhóm kỹ năng này."
           />
         ) : (
+          <>
+            <div className="space-y-2">
+              <div className="flex items-center justify-between gap-3">
+                <div>
+                  <p className="text-sm font-bold text-ink">
+                    Bảng tổng hợp · {selectedStandard.standard_name}
+                  </p>
+                  <p className="text-xs text-muted mt-0.5">
+                    Trung bình % của học viên trên từng bài test cha trong nhóm
+                    kỹ năng này.
+                  </p>
+                </div>
+              </div>
+              <StandardMatrix
+                standard={selectedStandard}
+                tests={testsInStandard}
+                subTests={subsInStandard}
+                students={students}
+                results={results}
+              />
+            </div>
+
           <Card>
             <CardBody className="!p-0">
               <ul className="divide-y divide-border/70">
@@ -282,6 +318,7 @@ export function TestExplorer({
               </ul>
             </CardBody>
           </Card>
+          </>
         )}
 
         <Modal
@@ -355,6 +392,13 @@ export function TestExplorer({
       </div>
 
       <ResultMatrix
+        standard={
+          standards.find((s) => s.id === selectedTest.club_standard_id) ?? {
+            id: selectedTest.club_standard_id,
+            standard_name: "",
+            standard_score: 100
+          }
+        }
         test={selectedTest}
         subTests={subsInTest}
         students={students}

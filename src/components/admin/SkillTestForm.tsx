@@ -47,6 +47,8 @@ export function SkillTestForm({
     }
   }, [initial, standards]);
 
+  const selectedStandard = standards.find((s) => s.id === clubStandardId);
+
   return (
     <form
       className="space-y-4"
@@ -62,14 +64,22 @@ export function SkillTestForm({
         });
       }}
     >
-      <FieldLabel label="Thuộc nhóm kỹ năng" required>
+      <FieldLabel
+        label="Thuộc nhóm kỹ năng"
+        required
+        hint={
+          selectedStandard
+            ? `Bài test này dùng điểm tiêu chuẩn ${selectedStandard.standard_score}% của nhóm "${selectedStandard.standard_name}".`
+            : undefined
+        }
+      >
         <Select
           value={clubStandardId}
           onChange={(e) => setClubStandardId(e.target.value)}
         >
           {standards.map((s) => (
             <option key={s.id} value={s.id}>
-              {s.standard_name}
+              {s.standard_name} · chuẩn {s.standard_score}%
             </option>
           ))}
         </Select>

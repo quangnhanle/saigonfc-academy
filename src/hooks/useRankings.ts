@@ -15,7 +15,10 @@ export function useRankings() {
     testResults,
     subSkillTests,
     skillTests,
-    clubStandards
+    clubStandards,
+    loading,
+    error,
+    refetch
   } = useDataStore();
 
   const overall = useMemo<OverallRanking[]>(
@@ -63,8 +66,8 @@ export function useRankings() {
     rankByStandard,
     rankBySubTest,
     studentRadarBuilder,
-    loading: false,
-    error: null as string | null,
-    refetch: async () => undefined
+    loading,
+    error,
+    refetch
   };
 }

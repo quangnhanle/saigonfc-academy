@@ -40,12 +40,16 @@ export function StudentProfilePage() {
 
   const radarData: RadarSkillData[] = useMemo(() => {
     if (!student) return [];
-    return studentRadarBuilder(student.id).map((row) => ({
-      skill: row.standard_name,
-      studentScore: row.average_score,
-      clubStandard: 100
-    }));
-  }, [student, studentRadarBuilder]);
+    return studentRadarBuilder(student.id).map((row) => {
+      const cs = standards.find((s) => s.id === row.standard_id);
+      console.log(cs);
+      return {
+        skill: row.standard_name,
+        studentScore: row.average_score,
+        clubStandard: cs?.standard_score ?? 100
+      };
+    });
+  }, [student, studentRadarBuilder, standards]);
 
   const groups: SkillSummaryGroup[] = useMemo(() => {
     if (!student) return [];

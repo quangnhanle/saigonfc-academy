@@ -212,8 +212,11 @@ function AdminContent() {
                           <p className="text-xs font-semibold text-brand-300 uppercase tracking-wider">
                             {cs.standard_name}
                           </p>
-                          <div className="mt-2">
+                          <div className="mt-2 flex flex-wrap gap-1.5">
                             <Pill>{testCount} bài test</Pill>
+                            <Pill tone="brand">
+                              Chuẩn {cs.standard_score ?? 100}%
+                            </Pill>
                           </div>
                         </div>
                         <ActionButtons

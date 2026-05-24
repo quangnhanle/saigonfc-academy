@@ -39,6 +39,13 @@ export function LeaderboardTable({ filter }: Props) {
 
   const rows: Row[] = useMemo(() => {
     if (filter === "all") {
+      const overallStandard =
+        standards.length === 0
+          ? 100
+          : standards.reduce(
+              (acc, s) => acc + (s.standard_score ?? 100),
+              0
+            ) / standards.length;
       return overall.map((o) => {
         const stu = studentMap.get(o.student_id);
         return {
@@ -50,14 +57,16 @@ export function LeaderboardTable({ filter }: Props) {
           position: stu?.position,
           groupLabel: "Tổng hợp 5 nhóm",
           score: o.average_score,
-          diff: Math.round((o.average_score - 100) * 10) / 10,
+          diff:
+            Math.round((o.average_score - overallStandard) * 10) / 10,
           rating: o.rating
         };
       });
     }
     const list = rankByStandard.get(filter) ?? [];
-    const standardName =
-      standards.find((s) => s.id === filter)?.standard_name ?? "—";
+    const selectedStandard = standards.find((s) => s.id === filter);
+    const standardName = selectedStandard?.standard_name ?? "—";
+    const standardScore = selectedStandard?.standard_score ?? 100;
     return list.map((r) => {
       const stu = studentMap.get(r.student_id);
       return {
@@ -69,7 +78,7 @@ export function LeaderboardTable({ filter }: Props) {
         position: stu?.position,
         groupLabel: standardName,
         score: r.average_score,
-        diff: Math.round((r.average_score - 100) * 10) / 10,
+        diff: Math.round((r.average_score - standardScore) * 10) / 10,
         rating: r.rating
       };
     });

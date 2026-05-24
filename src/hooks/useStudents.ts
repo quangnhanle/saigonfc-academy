@@ -4,9 +4,9 @@ export function useStudents() {
   const store = useDataStore();
   return {
     data: store.students,
-    loading: false,
-    error: null as string | null,
-    refetch: async () => undefined,
+    loading: store.loading,
+    error: store.error,
+    refetch: store.refetch,
     create: store.createStudent,
     update: store.updateStudent,
     remove: store.deleteStudent

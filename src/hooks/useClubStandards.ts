@@ -4,9 +4,9 @@ export function useClubStandards() {
   const store = useDataStore();
   return {
     data: store.clubStandards,
-    loading: false,
-    error: null as string | null,
-    refetch: async () => undefined,
+    loading: store.loading,
+    error: store.error,
+    refetch: store.refetch,
     create: store.createClubStandard,
     update: store.updateClubStandard,
     remove: store.deleteClubStandard

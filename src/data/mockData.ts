@@ -8,10 +8,10 @@ import type {
 import { calculateScorePercent } from "../utils/score";
 
 export const clubStandards: ClubStandard[] = [
-  { id: "cs-1", standard_name: "Dẫn bóng" },
-  { id: "cs-2", standard_name: "Chuyền bóng" },
-  { id: "cs-3", standard_name: "Sút bóng" },
-  { id: "cs-4", standard_name: "Thể lực" }
+  { id: "cs-1", standard_name: "Dẫn bóng", standard_score: 90 },
+  { id: "cs-2", standard_name: "Chuyền bóng", standard_score: 100 },
+  { id: "cs-3", standard_name: "Sút bóng", standard_score: 80 },
+  { id: "cs-4", standard_name: "Thể lực", standard_score: 95 }
 ];
 
 export const skillTests: SkillTest[] = [

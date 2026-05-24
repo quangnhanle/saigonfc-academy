@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { Pencil, Plus, Trash2 } from "lucide-react";
 import type {
+  ClubStandard,
   SkillTest,
   Student,
   SubSkillTest,
@@ -215,6 +216,7 @@ function SubHeaderChip({
 
 /* ---------- Matrix table ---------- */
 type Props = {
+  standard: ClubStandard;
   test: SkillTest;
   subTests: SubSkillTest[];
   students: Student[];
@@ -233,6 +235,7 @@ type Props = {
 };
 
 export function ResultMatrix({
+  standard,
   test,
   subTests,
   students,
@@ -244,6 +247,7 @@ export function ResultMatrix({
   onUpdateResult,
   onDeleteResult
 }: Props) {
+  const standardScore = standard.standard_score ?? 100;
   const [subModal, setSubModal] = useState<{
     open: boolean;
     editing: SubSkillTest | null;
@@ -364,51 +368,123 @@ export function ResultMatrix({
                       />
                     </th>
                   ))}
+                  <th className="text-left px-3 py-3 text-xs uppercase tracking-wider text-muted border-r border-border/60 min-w-[160px] bg-brand/5">
+                    <div className="flex flex-col gap-0.5">
+                      <span className="font-semibold text-brand-300 text-sm normal-case tracking-normal">
+                        Trung bình
+                      </span>
+                      <span className="text-[11px] text-muted normal-case tracking-normal">
+                        Chuẩn {standardScore}% (theo nhóm {standard.standard_name})
+                      </span>
+                    </div>
+                  </th>
+                  <th className="text-left px-3 py-3 text-xs uppercase tracking-wider text-muted min-w-[140px]">
+                    Đánh giá
+                  </th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-border/70">
-                {students.map((student) => (
-                  <tr key={student.id} className="hover:bg-brand/5 transition">
-                    <td className="sticky left-0 z-10 bg-card/95 backdrop-blur px-4 py-2 border-r border-border">
-                      <div className="flex items-center gap-2.5">
-                        <Avatar
-                          name={student.full_name}
-                          src={student.avatar_url}
-                          size="sm"
-                        />
-                        <div className="min-w-0">
-                          <p className="font-medium text-ink text-sm truncate">
-                            {student.full_name}
-                          </p>
-                          <p className="text-[11px] text-muted truncate">
-                            {student.position}
-                          </p>
-                        </div>
-                      </div>
-                    </td>
-                    {subTests.map((sub) => {
-                      const result = resultByKey.get(
-                        `${student.id}::${sub.id}`
-                      );
-                      return (
-                        <td
-                          key={sub.id}
-                          className="align-top border-r border-border/60"
-                        >
-                          <MatrixCell
-                            value={{
-                              result,
-                              studentId: student.id,
-                              sub,
-                              test
-                            }}
-                            onSave={(p) => handleCellSave(student, sub, p)}
+                {students.map((student) => {
+                  const studentScores: number[] = [];
+                  for (const sub of subTests) {
+                    const r = resultByKey.get(`${student.id}::${sub.id}`);
+                    if (r) studentScores.push(r.score_percent);
+                  }
+                  const avg =
+                    studentScores.length === 0
+                      ? null
+                      : Math.round(
+                          (studentScores.reduce((acc, s) => acc + s, 0) /
+                            studentScores.length) *
+                            10
+                        ) / 10;
+                  const diff =
+                    avg == null
+                      ? null
+                      : Math.round((avg - standardScore) * 10) / 10;
+                  const rating = avg == null ? null : getRating(avg);
+                  const ratingTone = rating ? RATING_TONE[rating] : null;
+
+                  return (
+                    <tr key={student.id} className="hover:bg-brand/5 transition">
+                      <td className="sticky left-0 z-10 bg-card/95 backdrop-blur px-4 py-2 border-r border-border">
+                        <div className="flex items-center gap-2.5">
+                          <Avatar
+                            name={student.full_name}
+                            src={student.avatar_url}
+                            size="sm"
                           />
-                        </td>
-                      );
-                    })}
-                  </tr>
-                ))}
+                          <div className="min-w-0">
+                            <p className="font-medium text-ink text-sm truncate">
+                              {student.full_name}
+                            </p>
+                            <p className="text-[11px] text-muted truncate">
+                              {student.position}
+                            </p>
+                          </div>
+                        </div>
+                      </td>
+                      {subTests.map((sub) => {
+                        const result = resultByKey.get(
+                          `${student.id}::${sub.id}`
+                        );
+                        return (
+                          <td
+                            key={sub.id}
+                            className="align-top border-r border-border/60"
+                          >
+                            <MatrixCell
+                              value={{
+                                result,
+                                studentId: student.id,
+                                sub,
+                                test
+                              }}
+                              onSave={(p) => handleCellSave(student, sub, p)}
+                            />
+                          </td>
+                        );
+                      })}
+                      <td className="px-3 py-2.5 border-r border-border/60 bg-brand/5 align-middle">
+                        {avg == null ? (
+                          <span className="text-xs text-muted">—</span>
+                        ) : (
+                          <div className="flex flex-col gap-0.5">
+                            <span className="font-bold text-ink text-sm">
+                              {avg.toFixed(1)}%
+                            </span>
+                            {diff != null ? (
+                              <span
+                                className={`text-[11px] font-semibold ${
+                                  diff >= 0
+                                    ? "text-emerald-400"
+                                    : "text-orange-400"
+                                }`}
+                              >
+                                {diff >= 0 ? "+" : ""}
+                                {diff.toFixed(1)}% so với chuẩn
+                              </span>
+                            ) : null}
+                          </div>
+                        )}
+                      </td>
+                      <td className="px-3 py-2.5 align-middle">
+                        {rating && ratingTone ? (
+                          <span
+                            className={`inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-xs font-semibold ring-1 ${ratingTone.bg} ${ratingTone.text} ${ratingTone.ring}`}
+                          >
+                            <span
+                              className={`h-1.5 w-1.5 rounded-full ${ratingTone.dot}`}
+                            />
+                            {ratingTone.label}
+                          </span>
+                        ) : (
+                          <span className="text-xs text-muted">—</span>
+                        )}
+                      </td>
+                    </tr>
+                  );
+                })}
               </tbody>
             </table>
           </div>
