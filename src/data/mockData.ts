@@ -8,10 +8,10 @@ import type {
 import { calculateScorePercent } from "../utils/score";
 
 export const clubStandards: ClubStandard[] = [
-  { id: "cs-1", standard_name: "Dẫn bóng" },
-  { id: "cs-2", standard_name: "Chuyền bóng" },
-  { id: "cs-3", standard_name: "Sút bóng" },
-  { id: "cs-4", standard_name: "Thể lực" }
+  { id: "cs-1", standard_name: "Dẫn bóng", standard_score: 100 },
+  { id: "cs-2", standard_name: "Chuyền bóng", standard_score: 100 },
+  { id: "cs-3", standard_name: "Sút bóng", standard_score: 100 },
+  { id: "cs-4", standard_name: "Thể lực", standard_score: 100 }
 ];
 
 export const skillTests: SkillTest[] = [
@@ -59,21 +59,24 @@ export const skillTests: SkillTest[] = [
 
 export const subSkillTests: SubSkillTest[] = [
   // Dẫn bóng qua chướng ngại vật
-  { id: "sst-drib-left",  skill_test_id: "st-dribbling-obstacle", sub_skill_test_name: "Chân trái", standard_score: 60 },
-  { id: "sst-drib-right", skill_test_id: "st-dribbling-obstacle", sub_skill_test_name: "Chân phải", standard_score: 70 },
-  { id: "sst-drib-both",  skill_test_id: "st-dribbling-obstacle", sub_skill_test_name: "Hai chân",  standard_score: 80 },
+  { id: "sst-drib-left",  skill_test_id: "st-dribbling-obstacle", sub_skill_test_name: "Chân trái", standard_score: 6 },
+  { id: "sst-drib-right", skill_test_id: "st-dribbling-obstacle", sub_skill_test_name: "Chân phải", standard_score: 7 },
+  { id: "sst-drib-both",  skill_test_id: "st-dribbling-obstacle", sub_skill_test_name: "Cả 2 chân",  standard_score: 8 },
 
   // Chuyền 15m
   { id: "sst-pass15-left",  skill_test_id: "st-passing-15m", sub_skill_test_name: "Chân trái", standard_score: 3.5 },
   { id: "sst-pass15-right", skill_test_id: "st-passing-15m", sub_skill_test_name: "Chân phải", standard_score: 3.0 },
+  { id: "sst-pass15-both",  skill_test_id: "st-passing-15m", sub_skill_test_name: "Cả 2 chân", standard_score: 3.25 },
 
   // Chuyền 25m
   { id: "sst-pass25-left",  skill_test_id: "st-passing-25m", sub_skill_test_name: "Chân trái", standard_score: 5.5 },
   { id: "sst-pass25-right", skill_test_id: "st-passing-25m", sub_skill_test_name: "Chân phải", standard_score: 5.0 },
+  { id: "sst-pass25-both",  skill_test_id: "st-passing-25m", sub_skill_test_name: "Cả 2 chân", standard_score: 5.25 },
 
   // Sút trúng mục tiêu
-  { id: "sst-shoot-flat", skill_test_id: "st-shooting-target", sub_skill_test_name: "Sút sệt",  standard_score: 70 },
-  { id: "sst-shoot-lob",  skill_test_id: "st-shooting-target", sub_skill_test_name: "Sút bổng", standard_score: 60 },
+  { id: "sst-shoot-flat", skill_test_id: "st-shooting-target", sub_skill_test_name: "Chân trái",  standard_score: 10 },
+  { id: "sst-shoot-lob",  skill_test_id: "st-shooting-target", sub_skill_test_name: "Chân phải", standard_score: 10 },
+  { id: "sst-shoot-both", skill_test_id: "st-shooting-target", sub_skill_test_name: "Cả 2 chân", standard_score: 10 },
 
   // Chạy nước rút
   { id: "sst-sprint-30", skill_test_id: "st-sprint-30m", sub_skill_test_name: "30m", standard_score: 4.3 }

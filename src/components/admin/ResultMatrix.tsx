@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
-import { Pencil, Plus, Trash2 } from "lucide-react";
+import { Pencil, Plus, Table2, Trophy, Trash2 } from "lucide-react";
 import type {
   SkillTest,
   Student,
@@ -7,19 +7,17 @@ import type {
   TestResult
 } from "../../types/database";
 import { Avatar } from "../common/Avatar";
+import { RankMedal, RatingBadge } from "../common/Badge";
 import { Button } from "../common/Button";
 import { EmptyState } from "../common/EmptyState";
 import { Modal } from "../common/Modal";
 import { SubSkillTestForm } from "./SubSkillTestForm";
-import { calculateScorePercent } from "../../utils/score";
 import { unitOf } from "../../types/football";
-import { RATING_TONE } from "../../utils/rating";
 import { getRating } from "../../utils/rating";
 
 type MatrixCellValue = {
   result?: TestResult;
   studentId: string;
-  sub: SubSkillTest;
   test: SkillTest;
 };
 
@@ -28,9 +26,26 @@ type CellSavePayload =
   | { kind: "value"; value: number | null }
   | { kind: "success_attempt"; success: number; attempt: number };
 
-function pickToneFromScore(score: number) {
-  const r = getRating(score);
-  return RATING_TONE[r];
+function average(scores: number[]) {
+  if (scores.length === 0) return 0;
+  return scores.reduce((acc, score) => acc + score, 0) / scores.length;
+}
+
+function clampSubScore(score: number) {
+  return Math.min(100, score);
+}
+
+function actualValue(result: TestResult, test: SkillTest) {
+  if (test.record_type === "success_attempt") {
+    return result.success_count ?? null;
+  }
+  return result.value_numeric ?? null;
+}
+
+function formatRankingInput(result: TestResult, test: SkillTest) {
+  const value = actualValue(result, test);
+  if (value == null) return "—";
+  return Number.isInteger(value) ? value.toString() : value.toFixed(2);
 }
 
 /* ---------- Single editable cell ---------- */
@@ -41,7 +56,7 @@ function MatrixCell({
   value: MatrixCellValue;
   onSave: (payload: CellSavePayload) => void;
 }) {
-  const { result, sub, test } = value;
+  const { result, test } = value;
   const isSA = test.record_type === "success_attempt";
 
   // Local state mirrors saved value
@@ -64,32 +79,6 @@ function MatrixCell({
     setSuccess(initialSuccess != null ? String(initialSuccess) : "");
     setAttempt(initialAttempt != null ? String(initialAttempt) : "");
   }, [initialNumeric, initialSuccess, initialAttempt]);
-
-  const liveScore = useMemo(() => {
-    if (isSA) {
-      const s = parseInt(success || "0", 10);
-      const a = parseInt(attempt || "0", 10);
-      if (!a) return null;
-      return calculateScorePercent({
-        recordType: test.record_type,
-        higherIsBetter: test.higher_is_better,
-        standardScore: sub.standard_score,
-        valueNumeric: null,
-        successCount: s,
-        attemptCount: a
-      });
-    }
-    const v = parseFloat(numeric || "");
-    if (!Number.isFinite(v)) return null;
-    return calculateScorePercent({
-      recordType: test.record_type,
-      higherIsBetter: test.higher_is_better,
-      standardScore: sub.standard_score,
-      valueNumeric: v,
-      successCount: null,
-      attemptCount: null
-    });
-  }, [isSA, numeric, success, attempt, sub.standard_score, test]);
 
   const commit = () => {
     if (isSA) {
@@ -115,9 +104,6 @@ function MatrixCell({
       onSave({ kind: "value", value: v });
     }
   };
-
-  const tone =
-    liveScore != null ? pickToneFromScore(liveScore) : null;
 
   return (
     <div className="p-2 min-w-[140px]">
@@ -159,15 +145,6 @@ function MatrixCell({
           </span>
         </div>
       )}
-      {liveScore != null && tone ? (
-        <div
-          className={`mt-1.5 inline-flex items-center rounded-full px-2 py-0.5 text-[10px] font-bold ring-1 ${tone.bg} ${tone.text} ${tone.ring}`}
-        >
-          {liveScore.toFixed(0)}%
-        </div>
-      ) : (
-        <div className="mt-1.5 text-[10px] text-muted">Chuẩn {sub.standard_score}</div>
-      )}
     </div>
   );
 }
@@ -182,7 +159,7 @@ function SubHeaderChip({
   sub: SubSkillTest;
   test: SkillTest;
   onEdit: () => void;
-  onDelete: () => void;
+  onDelete?: () => void;
 }) {
   return (
     <div className="flex flex-col gap-1">
@@ -201,13 +178,15 @@ function SubHeaderChip({
         >
           <Pencil className="h-3 w-3" />
         </button>
-        <button
-          onClick={onDelete}
-          className="h-6 w-6 rounded-md flex items-center justify-center bg-red-500/15 text-red-300 hover:bg-red-500/25 transition"
-          aria-label="Xóa bài test con"
-        >
-          <Trash2 className="h-3 w-3" />
-        </button>
+        {onDelete ? (
+          <button
+            onClick={onDelete}
+            className="h-6 w-6 rounded-md flex items-center justify-center bg-red-500/15 text-red-300 hover:bg-red-500/25 transition"
+            aria-label="Xóa bài test con"
+          >
+            <Trash2 className="h-3 w-3" />
+          </button>
+        ) : null}
       </div>
     </div>
   );
@@ -222,6 +201,7 @@ type Props = {
   onCreateSub: (data: Omit<SubSkillTest, "id">) => void;
   onUpdateSub: (id: string, data: Partial<Omit<SubSkillTest, "id">>) => void;
   onDeleteSub: (id: string) => void;
+  lockFootSubTests?: boolean;
   onCreateResult: (
     data: Omit<TestResult, "id" | "score_percent">
   ) => void;
@@ -240,10 +220,12 @@ export function ResultMatrix({
   onCreateSub,
   onUpdateSub,
   onDeleteSub,
+  lockFootSubTests = false,
   onCreateResult,
   onUpdateResult,
   onDeleteResult
 }: Props) {
+  const [view, setView] = useState<"matrix" | "ranking">("matrix");
   const [subModal, setSubModal] = useState<{
     open: boolean;
     editing: SubSkillTest | null;
@@ -257,6 +239,56 @@ export function ResultMatrix({
     }
     return map;
   }, [results]);
+
+  const rankingRows = useMemo(() => {
+    const rows = students
+      .map((student) => {
+        const cells = subTests.map((sub) => {
+          const result = resultByKey.get(`${student.id}::${sub.id}`);
+          return {
+            sub,
+            result,
+            actual: result ? actualValue(result, test) : null
+          };
+        });
+        const enteredCells = cells.filter(
+          (cell): cell is typeof cell & { actual: number } =>
+            cell.actual != null
+        );
+        const actualAverage = average(
+          enteredCells.map((cell) => cell.actual)
+        );
+        const standardAverage = average(
+          enteredCells.map((cell) => cell.sub.standard_score)
+        );
+        const rawSubScore =
+          actualAverage > 0 && standardAverage > 0
+            ? test.higher_is_better
+              ? (actualAverage / standardAverage) * 100
+              : (standardAverage / actualAverage) * 100
+            : 0;
+        const subScore = clampSubScore(
+          Math.round(rawSubScore * 10) / 10
+        );
+
+        return {
+          student,
+          cells,
+          subScore,
+          rating: getRating(subScore),
+          hasResult: enteredCells.length > 0,
+          rank: 0
+        };
+      })
+      .filter((row) => row.hasResult)
+      .sort((a, b) => b.subScore - a.subScore);
+
+    rows.forEach((row, index) => {
+      row.rank = index + 1;
+    });
+
+    return rows;
+  }, [students, subTests, resultByKey]);
 
   const handleCellSave = (
     student: Student,
@@ -307,14 +339,46 @@ export function ResultMatrix({
             xong bấm Tab/Click ra ngoài để lưu
           </p>
         </div>
-        <Button
-          variant="secondary"
-          size="sm"
-          leftIcon={<Plus className="h-3.5 w-3.5" />}
-          onClick={() => setSubModal({ open: true, editing: null })}
-        >
-          Thêm bài test con
-        </Button>
+        <div className="flex items-center gap-2">
+          <div className="inline-flex rounded-xl border border-border bg-background/60 p-1">
+            <button
+              type="button"
+              onClick={() => setView("matrix")}
+              className={[
+                "inline-flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-xs font-semibold transition",
+                view === "matrix"
+                  ? "bg-brand text-background shadow-soft"
+                  : "text-muted hover:text-ink"
+              ].join(" ")}
+            >
+              <Table2 className="h-3.5 w-3.5" />
+              Nhập điểm
+            </button>
+            <button
+              type="button"
+              onClick={() => setView("ranking")}
+              className={[
+                "inline-flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-xs font-semibold transition",
+                view === "ranking"
+                  ? "bg-brand text-background shadow-soft"
+                  : "text-muted hover:text-ink"
+              ].join(" ")}
+            >
+              <Trophy className="h-3.5 w-3.5" />
+              Xếp hạng
+            </button>
+          </div>
+        {!lockFootSubTests ? (
+          <Button
+            variant="secondary"
+            size="sm"
+            leftIcon={<Plus className="h-3.5 w-3.5" />}
+            onClick={() => setSubModal({ open: true, editing: null })}
+          >
+            Thêm bài test con
+          </Button>
+        ) : null}
+      </div>
       </div>
 
       {subTests.length === 0 ? (
@@ -322,6 +386,7 @@ export function ResultMatrix({
           title="Bài test này chưa có bài test con"
           description="Thêm ít nhất một bài test con (vd: Chân trái, Chân phải) để bắt đầu nhập kết quả."
           action={
+            lockFootSubTests ? undefined : (
             <Button
               variant="secondary"
               size="sm"
@@ -330,9 +395,10 @@ export function ResultMatrix({
             >
               Thêm bài test con đầu tiên
             </Button>
+            )
           }
         />
-      ) : (
+      ) : view === "matrix" ? (
         <div className="rounded-2xl border border-border bg-card shadow-soft overflow-hidden">
           <div className="overflow-x-auto scrollbar-thin">
             <table className="w-full border-collapse">
@@ -352,15 +418,19 @@ export function ResultMatrix({
                         onEdit={() =>
                           setSubModal({ open: true, editing: sub })
                         }
-                        onDelete={() => {
-                          if (
-                            confirm(
-                              `Xóa bài test con "${sub.sub_skill_test_name}"? Toàn bộ kết quả của bài test con này sẽ bị xóa.`
-                            )
-                          ) {
-                            onDeleteSub(sub.id);
-                          }
-                        }}
+                        onDelete={
+                          lockFootSubTests
+                            ? undefined
+                            : () => {
+                                if (
+                                  confirm(
+                                    `Xóa bài test con "${sub.sub_skill_test_name}"? Toàn bộ kết quả của bài test con này sẽ bị xóa.`
+                                  )
+                                ) {
+                                  onDeleteSub(sub.id);
+                                }
+                              }
+                        }
                       />
                     </th>
                   ))}
@@ -399,7 +469,6 @@ export function ResultMatrix({
                             value={{
                               result,
                               studentId: student.id,
-                              sub,
                               test
                             }}
                             onSave={(p) => handleCellSave(student, sub, p)}
@@ -407,6 +476,99 @@ export function ResultMatrix({
                         </td>
                       );
                     })}
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      ) : rankingRows.length === 0 ? (
+        <EmptyState
+          title="Chưa có dữ liệu xếp hạng"
+          description="Nhập kết quả cho ít nhất một học viên để xem bảng xếp hạng của bài test này."
+        />
+      ) : (
+        <div className="rounded-2xl border border-border bg-card shadow-soft overflow-hidden">
+          <div className="overflow-x-auto scrollbar-thin">
+            <table className="w-full border-collapse text-sm">
+              <thead className="text-xs uppercase tracking-wider text-muted bg-ink/[0.04]">
+                <tr>
+                  <th className="text-left font-semibold px-4 py-3 w-20">
+                    Hạng
+                  </th>
+                  <th className="sticky left-0 z-10 bg-card/95 backdrop-blur min-w-[220px] text-left font-semibold px-4 py-3 border-r border-border">
+                    Học viên
+                  </th>
+                  {subTests.map((sub) => (
+                    <th
+                      key={sub.id}
+                      className="text-left font-semibold px-3 py-3 min-w-[150px] border-r border-border/60"
+                    >
+                      {sub.sub_skill_test_name}
+                    </th>
+                  ))}
+                  <th className="text-left font-semibold px-4 py-3 min-w-[120px]">
+                    Điểm sub
+                  </th>
+                  <th className="text-left font-semibold px-4 py-3 min-w-[150px]">
+                    Đánh giá
+                  </th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-border/70">
+                {rankingRows.map((row) => (
+                  <tr
+                    key={row.student.id}
+                    className="hover:bg-brand/5 transition"
+                  >
+                    <td className="px-4 py-3 align-middle">
+                      <RankMedal rank={row.rank} />
+                    </td>
+                    <td className="sticky left-0 z-10 bg-card/95 backdrop-blur px-4 py-3 align-middle border-r border-border">
+                      <div className="flex items-center gap-2.5">
+                        <Avatar
+                          name={row.student.full_name}
+                          src={row.student.avatar_url}
+                          size="sm"
+                        />
+                        <div className="min-w-0">
+                          <p className="font-semibold text-ink truncate">
+                            {row.student.full_name}
+                          </p>
+                          <p className="text-[11px] text-muted truncate">
+                            {row.student.position}
+                          </p>
+                        </div>
+                      </div>
+                    </td>
+                    {row.cells.map((cell) => (
+                      <td
+                        key={cell.sub.id}
+                        className="px-3 py-3 align-middle border-r border-border/60"
+                      >
+                        {cell.result ? (
+                          <div>
+                            <p className="font-semibold text-ink">
+                              {formatRankingInput(cell.result, test)}
+                            </p>
+                            <p className="text-[11px] text-muted mt-0.5">
+                              Chuẩn {cell.sub.standard_score}{" "}
+                              {unitOf(test.record_type)}
+                            </p>
+                          </div>
+                        ) : (
+                          <span className="text-muted">—</span>
+                        )}
+                      </td>
+                    ))}
+                    <td className="px-4 py-3 align-middle">
+                      <span className="font-bold text-ink">
+                        {row.subScore.toFixed(1)}%
+                      </span>
+                    </td>
+                    <td className="px-4 py-3 align-middle">
+                      <RatingBadge rating={row.rating} />
+                    </td>
                   </tr>
                 ))}
               </tbody>

@@ -19,8 +19,14 @@ export function useRankings() {
   } = useDataStore();
 
   const overall = useMemo<OverallRanking[]>(
-    () => computeOverallRanking(testResults),
-    [testResults]
+    () =>
+      computeOverallRanking({
+        testResults,
+        subSkillTests,
+        skillTests,
+        clubStandards
+      }),
+    [testResults, subSkillTests, skillTests, clubStandards]
   );
 
   const rankByStandard = useMemo(() => {

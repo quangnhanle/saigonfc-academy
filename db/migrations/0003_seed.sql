@@ -40,15 +40,18 @@ INSERT INTO sub_skill_tests
 SELECT st.id, s.sub_name, s.standard_score, s.display_order
   FROM st
   JOIN (VALUES
-    ('Dẫn bóng qua chướng ngại vật', 'Chân trái',  60, 1),
-    ('Dẫn bóng qua chướng ngại vật', 'Chân phải',  70, 2),
-    ('Dẫn bóng qua chướng ngại vật', 'Hai chân',   80, 3),
+    ('Dẫn bóng qua chướng ngại vật', 'Chân trái',  6,    1),
+    ('Dẫn bóng qua chướng ngại vật', 'Chân phải',  7,    2),
+    ('Dẫn bóng qua chướng ngại vật', 'Cả 2 chân',  8,    3),
     ('Chuyền 15m',                   'Chân trái',  3.5, 1),
     ('Chuyền 15m',                   'Chân phải',  3.0, 2),
+    ('Chuyền 15m',                   'Cả 2 chân',  3.25, 3),
     ('Chuyền 25m',                   'Chân trái',  5.5, 1),
     ('Chuyền 25m',                   'Chân phải',  5.0, 2),
-    ('Sút trúng mục tiêu',           'Sút sệt',    70,  1),
-    ('Sút trúng mục tiêu',           'Sút bổng',   60,  2),
+    ('Chuyền 25m',                   'Cả 2 chân',  5.25, 3),
+    ('Sút trúng mục tiêu',           'Chân trái',  10,  1),
+    ('Sút trúng mục tiêu',           'Chân phải',  10,  2),
+    ('Sút trúng mục tiêu',           'Cả 2 chân',  10,  3),
     ('Chạy nước rút 30m',            '30m',        4.3, 1)
   ) AS s(test_name, sub_name, standard_score, display_order)
     ON s.test_name = st.test_name

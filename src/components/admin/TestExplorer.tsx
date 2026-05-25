@@ -23,6 +23,16 @@ import { SkillTestForm } from "./SkillTestForm";
 import { ResultMatrix } from "./ResultMatrix";
 import { RECORD_TYPE_LABEL, unitOf } from "../../types/football";
 
+const DEFAULT_FOOT_SUB_TESTS = ["Chân trái", "Chân phải", "Cả 2 chân"];
+
+function isFitnessStandard(standard: ClubStandard | null) {
+  return standard?.standard_name.toLowerCase().includes("thể lực") ?? false;
+}
+
+function defaultSubStandardScore(test: SkillTest) {
+  return test.record_type === "success_attempt" ? 10 : 0;
+}
+
 type Props = {
   standards: ClubStandard[];
   tests: SkillTest[];
@@ -104,6 +114,7 @@ export function TestExplorer({
     setSelectedTestId(null);
   };
   const goToTests = () => setSelectedTestId(null);
+  const shouldLockFootSubTests = !isFitnessStandard(selectedStandard);
 
   /* -------- Breadcrumb -------- */
   const breadcrumb = (
@@ -308,6 +319,15 @@ export function TestExplorer({
                 onUpdateTest(testModal.editing.id, data);
               } else {
                 const created = onCreateTest(data);
+                if (!isFitnessStandard(selectedStandard)) {
+                  DEFAULT_FOOT_SUB_TESTS.forEach((subName) => {
+                    onCreateSub({
+                      skill_test_id: created.id,
+                      sub_skill_test_name: subName,
+                      standard_score: defaultSubStandardScore(created)
+                    });
+                  });
+                }
                 setSelectedTestId(created.id);
               }
               setTestModal({ open: false, editing: null });
@@ -362,6 +382,7 @@ export function TestExplorer({
         onCreateSub={onCreateSub}
         onUpdateSub={onUpdateSub}
         onDeleteSub={onDeleteSub}
+        lockFootSubTests={shouldLockFootSubTests}
         onCreateResult={onCreateResult}
         onUpdateResult={onUpdateResult}
         onDeleteResult={onDeleteResult}

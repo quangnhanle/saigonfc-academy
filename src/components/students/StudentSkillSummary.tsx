@@ -3,6 +3,7 @@ import { getRating } from "../../utils/rating";
 
 export type SkillSummaryRow = {
   key: string;
+  testId: string;
   testName: string;
   subSkillTestName: string;
   unit: string;
@@ -100,7 +101,7 @@ export function StudentSkillSummary({ groups }: Props) {
                       <div className="mt-3">
                         <div className="flex items-center justify-between text-[11px] text-muted">
                           <span>
-                            Chuẩn: {row.standardScore} {row.unit}
+                            Tiêu chuẩn: {row.standardScore} {row.unit}
                           </span>
                           <span
                             className={

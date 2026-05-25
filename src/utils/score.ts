@@ -33,7 +33,7 @@ export function calculateScorePercent({
     ) {
       return 0;
     }
-    actual = (successCount / attemptCount) * 100;
+    actual = successCount;
   } else {
     actual = valueNumeric ?? null;
   }

@@ -30,7 +30,7 @@ export const RECORD_TYPE_LABEL: Record<RecordType, string> = {
 
 export const RECORD_TYPE_UNIT: Record<RecordType, string> = {
   time_seconds: "giây",
-  success_attempt: "%"
+  success_attempt: "lần"
 };
 
 export const RECORD_TYPE_HINT: Record<RecordType, string> = {

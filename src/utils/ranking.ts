@@ -42,21 +42,74 @@ function avg(scores: number[]): number {
   return scores.reduce((acc, s) => acc + s, 0) / scores.length;
 }
 
-/**
- * Tính trung bình score_percent của 1 học viên trên toàn bộ kết quả.
- */
-export function computeOverallRanking(
-  testResults: TestResult[]
-): OverallRanking[] {
-  const byStudent = new Map<string, number[]>();
-  for (const r of testResults) {
-    const list = byStudent.get(r.student_id) ?? [];
-    list.push(r.score_percent);
-    byStudent.set(r.student_id, list);
+function roundScore(score: number): number {
+  return Math.round(score * 10) / 10;
+}
+
+function capScore(score: number): number {
+  return Math.min(100, score);
+}
+
+function buildResultLookup(testResults: TestResult[]) {
+  const map = new Map<string, TestResult>();
+  for (const result of testResults) {
+    map.set(`${result.student_id}::${result.sub_skill_test_id}`, result);
   }
+  return map;
+}
+
+function computeStudentTestScore(
+  studentId: string,
+  testId: string,
+  { subSkillTests, testResults }: ResultIndex
+): number | null {
+  const resultByKey = buildResultLookup(testResults);
+  const subIds = subSkillTests
+    .filter((sub) => sub.skill_test_id === testId)
+    .map((sub) => sub.id);
+  const scores = subIds
+    .map((subId) => resultByKey.get(`${studentId}::${subId}`))
+    .filter((result): result is TestResult => Boolean(result))
+    .map((result) => capScore(result.score_percent));
+
+  if (scores.length === 0) return null;
+  return roundScore(avg(scores));
+}
+
+function computeStudentStandardScore(
+  studentId: string,
+  standardId: string,
+  index: ResultIndex
+): number | null {
+  const testScores = index.skillTests
+    .filter((test) => test.club_standard_id === standardId)
+    .map((test) => computeStudentTestScore(studentId, test.id, index))
+    .filter((score): score is number => score != null);
+
+  if (testScores.length === 0) return null;
+  return roundScore(avg(testScores));
+}
+
+function studentIdsWithResults(testResults: TestResult[]): string[] {
+  return [...new Set(testResults.map((result) => result.student_id))];
+}
+
+/**
+ * Tính tổng hợp bằng trung bình các nhóm kỹ năng đã có dữ liệu.
+ * Mỗi nhóm kỹ năng được tính từ trung bình các bài test trong nhóm, và mỗi
+ * bài test là trung bình điểm các bài test con đã nhập, chặn tối đa 100%.
+ */
+export function computeOverallRanking(index: ResultIndex): OverallRanking[] {
   const overall: OverallRanking[] = [];
-  for (const [student_id, scores] of byStudent.entries()) {
-    const a = Math.round(avg(scores) * 10) / 10;
+  for (const student_id of studentIdsWithResults(index.testResults)) {
+    const standardScores = index.clubStandards
+      .map((standard) =>
+        computeStudentStandardScore(student_id, standard.id, index)
+      )
+      .filter((score): score is number => score != null);
+    if (standardScores.length === 0) continue;
+
+    const a = roundScore(avg(standardScores));
     overall.push({
       student_id,
       average_score: a,
@@ -70,35 +123,19 @@ export function computeOverallRanking(
 }
 
 /**
- * Trung bình score_percent của 1 học viên trên 1 club_standard
- * (gom tất cả sub_skill_test thuộc các skill_test của standard đó).
+ * Xếp hạng 1 nhóm kỹ năng bằng trung bình các bài test trong nhóm.
+ * Trong mỗi bài test, chỉ tính trung bình các bài test con đã nhập và chặn
+ * điểm con tối đa 100%.
  */
 export function computeStandardRanking(
   standardId: string,
-  { testResults, subSkillTests, skillTests }: ResultIndex
+  index: ResultIndex
 ): StandardRanking[] {
-  const testIdsInStandard = new Set(
-    skillTests
-      .filter((t) => t.club_standard_id === standardId)
-      .map((t) => t.id)
-  );
-  const subIdsInStandard = new Set(
-    subSkillTests
-      .filter((s) => testIdsInStandard.has(s.skill_test_id))
-      .map((s) => s.id)
-  );
-
-  const byStudent = new Map<string, number[]>();
-  for (const r of testResults) {
-    if (!subIdsInStandard.has(r.sub_skill_test_id)) continue;
-    const list = byStudent.get(r.student_id) ?? [];
-    list.push(r.score_percent);
-    byStudent.set(r.student_id, list);
-  }
-
   const rankings: StandardRanking[] = [];
-  for (const [student_id, scores] of byStudent.entries()) {
-    const a = Math.round(avg(scores) * 10) / 10;
+  for (const student_id of studentIdsWithResults(index.testResults)) {
+    const a = computeStudentStandardScore(student_id, standardId, index);
+    if (a == null) continue;
+
     rankings.push({
       student_id,
       club_standard_id: standardId,
@@ -121,47 +158,34 @@ export function computeSubTestRanking(
 ): SubTestRanking[] {
   const rows = testResults
     .filter((r) => r.sub_skill_test_id === subSkillTestId)
-    .map((r) => ({
-      student_id: r.student_id,
-      sub_skill_test_id: r.sub_skill_test_id,
-      score: r.score_percent,
-      rank_position: 0,
-      rating: getRating(r.score_percent)
-    }));
+    .map((r) => {
+      const score = capScore(r.score_percent);
+      return {
+        student_id: r.student_id,
+        sub_skill_test_id: r.sub_skill_test_id,
+        score,
+        rank_position: 0,
+        rating: getRating(score)
+      };
+    });
   rows.sort((a, b) => b.score - a.score);
   rows.forEach((row, i) => (row.rank_position = i + 1));
   return rows;
 }
 
 /**
- * Trung bình score_percent của học viên cho mỗi club_standard,
+ * Trung bình điểm kỹ năng của học viên cho mỗi club_standard,
  * dùng cho radar chart trên trang hồ sơ.
  */
 export function computeStudentAveragesByStandard(
   studentId: string,
-  { testResults, subSkillTests, skillTests, clubStandards }: ResultIndex
+  index: ResultIndex
 ): { standard_id: string; standard_name: string; average_score: number }[] {
-  const subById = new Map(subSkillTests.map((s) => [s.id, s]));
-  const testById = new Map(skillTests.map((t) => [t.id, t]));
-
-  const byStandard = new Map<string, number[]>();
-  for (const r of testResults) {
-    if (r.student_id !== studentId) continue;
-    const sub = subById.get(r.sub_skill_test_id);
-    if (!sub) continue;
-    const test = testById.get(sub.skill_test_id);
-    if (!test) continue;
-    const list = byStandard.get(test.club_standard_id) ?? [];
-    list.push(r.score_percent);
-    byStandard.set(test.club_standard_id, list);
-  }
-
-  return clubStandards
+  return index.clubStandards
     .slice()
     .map((cs) => ({
       standard_id: cs.id,
       standard_name: cs.standard_name,
-      average_score:
-        Math.round(avg(byStandard.get(cs.id) ?? []) * 10) / 10
+      average_score: computeStudentStandardScore(studentId, cs.id, index) ?? 0
     }));
 }

@@ -11,6 +11,8 @@ import { Card, CardBody, CardHeader } from "../components/common/Card";
 import { Avatar } from "../components/common/Avatar";
 import { Pill, RatingBadge } from "../components/common/Badge";
 import { EmptyState } from "../components/common/EmptyState";
+import { SkillFilter, type StandardFilterValue } from "../components/leaderboard/SkillFilter";
+import { LeaderboardTable } from "../components/leaderboard/LeaderboardTable";
 import { useStudents } from "../hooks/useStudents";
 import { useClubStandards } from "../hooks/useClubStandards";
 import { useSkillTests } from "../hooks/useSkillTests";
@@ -54,6 +56,8 @@ function ActionButtons({
 
 function AdminContent() {
   const [tab, setTab] = useState<AdminTabKey>("students");
+  const [rankingFilter, setRankingFilter] =
+    useState<StandardFilterValue>("all");
 
   const students = useStudents();
   const standards = useClubStandards();
@@ -212,6 +216,9 @@ function AdminContent() {
                           <p className="text-xs font-semibold text-brand-300 uppercase tracking-wider">
                             {cs.standard_name}
                           </p>
+                          <p className="text-xs text-muted mt-1">
+                            Chuẩn skill {cs.standard_score}%
+                          </p>
                           <div className="mt-2">
                             <Pill>{testCount} bài test</Pill>
                           </div>
@@ -258,6 +265,28 @@ function AdminContent() {
           onUpdateResult={results.update}
           onDeleteResult={results.remove}
         />
+      )}
+
+      {/* ========== RANKINGS ========== */}
+      {tab === "rankings" && (
+        <div className="space-y-4">
+          <Card>
+            <CardHeader
+              title="Bảng xếp hạng học viên"
+              subtitle="Xem điểm tổng hợp hoặc điểm theo từng nhóm kỹ năng"
+            />
+            <CardBody>
+              <div className="space-y-4">
+                <SkillFilter
+                  value={rankingFilter}
+                  standards={standards.data}
+                  onChange={setRankingFilter}
+                />
+                <LeaderboardTable filter={rankingFilter} />
+              </div>
+            </CardBody>
+          </Card>
+        </div>
       )}
 
       {/* ========== MODALS ========== */}

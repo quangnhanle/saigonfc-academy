@@ -1,11 +1,12 @@
-import { Users, Layers, Dumbbell } from "lucide-react";
+import { Users, Layers, Dumbbell, Trophy } from "lucide-react";
 
-export type AdminTabKey = "students" | "standards" | "tests";
+export type AdminTabKey = "students" | "standards" | "tests" | "rankings";
 
 const TABS: { key: AdminTabKey; label: string; icon: typeof Users }[] = [
   { key: "students",  label: "Học viên",     icon: Users },
   { key: "standards", label: "Nhóm kỹ năng", icon: Layers },
-  { key: "tests",     label: "Bài test",     icon: Dumbbell }
+  { key: "tests",     label: "Bài test",     icon: Dumbbell },
+  { key: "rankings",  label: "Bảng xếp hạng", icon: Trophy }
 ];
 
 type Props = {

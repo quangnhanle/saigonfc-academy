@@ -25,6 +25,15 @@ import {
 } from "../utils/score";
 import { unitOf } from "../types/football";
 
+function capScore(score: number) {
+  return Math.min(100, score);
+}
+
+function average(scores: number[]) {
+  if (scores.length === 0) return 0;
+  return scores.reduce((acc, score) => acc + score, 0) / scores.length;
+}
+
 export function StudentProfilePage() {
   const { studentId } = useParams<{ studentId: string }>();
   const navigate = useNavigate();
@@ -79,13 +88,14 @@ export function StudentProfilePage() {
               ?.find((rr) => rr.student_id === student.id)?.rank_position ?? 0;
           return {
             key: r.id,
+            testId: test.id,
             testName: test.test_name,
             subSkillTestName: sub.sub_skill_test_name,
             unit: unitOf(test.record_type),
             standardScore: sub.standard_score,
             recordType: test.record_type,
             rawLabel: formatResultRaw(r, test.record_type),
-            scorePercent: r.score_percent,
+            scorePercent: capScore(r.score_percent),
             difference: calculateDifference(
               r,
               test.record_type,
@@ -96,18 +106,25 @@ export function StudentProfilePage() {
           };
         });
 
-        const average =
-          rows.length === 0
+        const scoreByTest = standardTests
+          .map((test) => {
+            const testScores = rows
+              .filter((row) => row.testId === test.id)
+              .map((row) => capScore(row.scorePercent));
+            if (testScores.length === 0) return null;
+            return average(testScores);
+          })
+          .filter((score): score is number => score != null);
+
+        const averageScore =
+          scoreByTest.length === 0
             ? 0
-            : Math.round(
-                (rows.reduce((acc, r) => acc + r.scorePercent, 0) / rows.length) *
-                  10
-              ) / 10;
+            : Math.round(average(scoreByTest) * 10) / 10;
 
         return {
           standardId: cs.id,
           standardName: cs.standard_name,
-          averageScore: average,
+          averageScore,
           rows
         };
       });

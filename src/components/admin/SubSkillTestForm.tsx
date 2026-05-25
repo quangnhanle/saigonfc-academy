@@ -61,15 +61,15 @@ export function SubSkillTestForm({
       </FieldLabel>
       <div className="grid sm:grid-cols-2 gap-4">
         <FieldLabel
-          label={`Điểm chuẩn (${
+          label={`Tiêu chuẩn bài test con (${
             selectedTest ? unitOf(selectedTest.record_type) : ""
           })`}
           required
           hint={
             selectedTest
               ? selectedTest.higher_is_better
-                ? "Càng cao càng tốt"
-                : "Càng thấp càng tốt"
+                ? "Nhập chuẩn theo cùng đơn vị với kết quả, ví dụ 10 lần."
+                : "Nhập chuẩn theo cùng đơn vị với kết quả, ví dụ 4.30 giây."
               : undefined
           }
         >

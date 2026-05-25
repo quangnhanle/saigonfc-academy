@@ -3,6 +3,10 @@ import { useClubStandards } from "../../hooks/useClubStandards";
 import { useSkillTests } from "../../hooks/useSkillTests";
 import { useSubSkillTests } from "../../hooks/useSubSkillTests";
 
+function isFitnessStandard(standardName: string) {
+  return standardName.toLowerCase().includes("thể lực");
+}
+
 export function StandardOverview() {
   const { data: standards } = useClubStandards();
   const { data: tests } = useSkillTests();
@@ -40,6 +44,9 @@ export function StandardOverview() {
                     <p className="text-xs font-semibold text-brand-300 uppercase tracking-wider">
                       {cs.standard_name}
                     </p>
+                    <p className="text-[11px] text-muted mt-1">
+                      Chuẩn skill {cs.standard_score}%
+                    </p>
                   </div>
                   <div className="text-right shrink-0">
                     <p className="display-font text-2xl text-ink leading-none">
@@ -59,17 +66,22 @@ export function StandardOverview() {
                         const subCount = csSubs.filter(
                           (s) => s.skill_test_id === t.id
                         ).length;
+                        const displaySubCount = isFitnessStandard(
+                          cs.standard_name
+                        )
+                          ? subCount
+                          : 3;
                         return (
                           <div
                             key={t.id}
-                            className="flex items-center justify-between text-[12px]"
+                            className="flex items-start justify-between gap-3 text-[12px]"
                           >
                             <span className="flex items-center gap-1.5 text-ink/85 min-w-0">
                               <ChevronRight className="h-3 w-3 text-muted shrink-0" />
                               <span className="truncate">{t.test_name}</span>
                             </span>
-                            <span className="text-muted shrink-0 ml-2">
-                              {subCount} bài con
+                            <span className="text-muted shrink-0">
+                              {displaySubCount} bài con
                             </span>
                           </div>
                         );

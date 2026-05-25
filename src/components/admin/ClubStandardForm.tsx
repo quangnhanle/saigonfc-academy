@@ -11,12 +11,15 @@ type Props = {
 
 export function ClubStandardForm({ initial, onCancel, onSubmit }: Props) {
   const [standardName, setStandardName] = useState("");
+  const [standardScore, setStandardScore] = useState(100);
 
   useEffect(() => {
     if (initial) {
       setStandardName(initial.standard_name);
+      setStandardScore(initial.standard_score);
     } else {
       setStandardName("");
+      setStandardScore(100);
     }
   }, [initial]);
 
@@ -28,6 +31,7 @@ export function ClubStandardForm({ initial, onCancel, onSubmit }: Props) {
         if (!standardName.trim()) return;
         onSubmit({
           standard_name: standardName.trim(),
+          standard_score: Number(standardScore)
         });
       }}
     >
@@ -36,6 +40,20 @@ export function ClubStandardForm({ initial, onCancel, onSubmit }: Props) {
           value={standardName}
           onChange={(e) => setStandardName(e.target.value)}
           placeholder="Ví dụ: Dẫn bóng, Chuyền bóng..."
+          required
+        />
+      </FieldLabel>
+      <FieldLabel
+        label="Tiêu chuẩn nhóm kỹ năng (%)"
+        required
+        hint="Chuẩn CLB cho nhóm kỹ năng này, thường là 100%."
+      >
+        <TextInput
+          type="number"
+          step="0.1"
+          min={0}
+          value={standardScore}
+          onChange={(e) => setStandardScore(parseFloat(e.target.value || "0"))}
           required
         />
       </FieldLabel>

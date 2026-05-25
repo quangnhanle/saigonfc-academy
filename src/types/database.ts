@@ -12,6 +12,7 @@ export type Student = {
 export type ClubStandard = {
   id: string;
   standard_name: string;
+  standard_score: number;
 };
 
 export type SkillTest = {
