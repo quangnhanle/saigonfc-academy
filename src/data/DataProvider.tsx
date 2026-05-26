@@ -79,7 +79,13 @@ type DataState = {
 const DataContext = createContext<DataState | null>(null);
 
 let counter = 1000;
-const nextId = (prefix: string) => `${prefix}-${(counter++).toString(36)}`;
+const randSuffix = () =>
+  Math.random().toString(36).slice(2, 8) +
+  Date.now().toString(36).slice(-4);
+const nextId = (prefix: string) =>
+  prefix === "toast"
+    ? `${prefix}-${(counter++).toString(36)}`
+    : `${prefix}-${randSuffix()}`;
 
 function toMessage(err: unknown): string {
   if (err instanceof Error) return err.message;
