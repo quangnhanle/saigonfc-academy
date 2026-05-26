@@ -13,7 +13,7 @@ type ScoreInput = {
 
 /**
  * Quy raw value về 1 con số "actual" rồi so với standard_score.
- * Trả về phần trăm đạt chuẩn, clamp [0, 200].
+ * Trả về phần trăm đạt chuẩn, clamp [0, 100].
  */
 export function calculateScorePercent({
   recordType,
@@ -44,7 +44,7 @@ export function calculateScorePercent({
     ? (actual / standardScore) * 100
     : (standardScore / actual) * 100;
 
-  return Math.round(Math.max(0, Math.min(raw, 200)) * 100) / 100;
+  return Math.round(Math.max(0, Math.min(raw, 100)) * 100) / 100;
 }
 
 /**
